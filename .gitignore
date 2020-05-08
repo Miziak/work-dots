@@ -5,6 +5,7 @@
 !/kitty
 !/dunst
 !/picom
+!/ranger
 
 *.o
 *.py~

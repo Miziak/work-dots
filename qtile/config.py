@@ -61,10 +61,15 @@ keys = [
     Key(['shift'], 'Print', lazy.spawn('gnome-screenshot -i')),
     Key([mod], 'b', lazy.spawn('google-chrome')),
     Key([mod], 'n', lazy.spawn('kitty --class="kitty-ranger" ranger')),
-    Key([mod], 'x', lazy.group['scratchpad'].dropdown_toggle('keepassxc')),
 ]
 
 groups = [
+    ScratchPad("scratchpad", [
+        DropDown("keepassxc", "keepassxc",
+            x=0.3, y=0.2, width=0.4, height=0.6,
+            on_focus_lost_hide=True
+        )
+    ]),
     Group("a", label="", layout="max", matches=[
         Match(wm_class=["Google-chrome"]),
     ]),
@@ -82,28 +87,24 @@ groups = [
 ]
 
 for i in groups:
-    keys.extend([
-        # mod1 + letter of group = switch to group
-        Key([mod], i.name, lazy.group[i.name].toscreen(),
-            desc="Switch to group {}".format(i.name)),
+    if i.name == 'scratchpad':
+        keys.extend([
+            Key([mod], 'x', lazy.group['scratchpad'].dropdown_toggle('keepassxc')),
+        ])
+    else:
+        keys.extend([
+            # mod1 + letter of group = switch to group
+            Key([mod], i.name, lazy.group[i.name].toscreen(),
+                desc="Switch to group {}".format(i.name)),
 
-        # mod1 + shift + letter of group = switch to & move focused window to group
-        Key([mod, "shift"], i.name, lazy.window.togroup(i.name, switch_group=True),
-            desc="Switch to & move focused window to group {}".format(i.name)),
-        # Or, use below if you prefer not to switch to that group.
-        # # mod1 + shift + letter of group = move focused window to group
-        # Key([mod, "shift"], i.name, lazy.window.togroup(i.name),
-        #     desc="move focused window to group {}".format(i.name)),
-    ])
-
-groups.extend([
-    ScratchPad("scratchpad", [
-        DropDown("keepassxc", "keepassxc",
-            x=0.3, y=0.2, width=0.4, height=0.6,
-            on_focus_lost_hide=True
-        )
-    ]),
-])
+            # mod1 + shift + letter of group = switch to & move focused window to group
+            Key([mod, "shift"], i.name, lazy.window.togroup(i.name, switch_group=True),
+                desc="Switch to & move focused window to group {}".format(i.name)),
+            # Or, use below if you prefer not to switch to that group.
+            # # mod1 + shift + letter of group = move focused window to group
+            # Key([mod, "shift"], i.name, lazy.window.togroup(i.name),
+            #     desc="move focused window to group {}".format(i.name)),
+        ])
 
 lColors = {
     "border_focus": "cc241d",
@@ -208,7 +209,6 @@ def get_num_monitors():
         return num_monitors
 
 count = get_num_monitors()
-logger.warning(count)
 
 screens = [master_screen]
 
