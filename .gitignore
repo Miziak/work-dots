@@ -1,0 +1,12 @@
+/*
+!.gitignore
+!/qtile
+/qtile/__pycache__
+!/kitty
+!/dunst
+!/picom
+
+*.o
+*.py~
+*.pz~
+*.sw*

@@ -1,37 +1,14 @@
-# Copyright (c) 2010 Aldo Cortesi
-# Copyright (c) 2010, 2014 dequis
-# Copyright (c) 2012 Randall Ma
-# Copyright (c) 2012-2014 Tycho Andersen
-# Copyright (c) 2012 Craig Barnes
-# Copyright (c) 2013 horsik
-# Copyright (c) 2013 Tao Sauvage
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 import os
 import subprocess
+import pyudev
+from Xlib import display as xdisplay
 
 from typing import List  # noqa: F401
 
-from libqtile import bar, layout, widget, hook, extension
-from libqtile.config import Click, Drag, Group, Key, Screen
+from libqtile import bar, layout, widget, hook
+from libqtile.config import Click, Drag, Group, Key, Screen, Match, ScratchPad, DropDown
 from libqtile.lazy import lazy
+from libqtile.log_utils import logger
 
 #xephyr mod
 #mod = "mod1"
@@ -46,6 +23,8 @@ keys = [
     Key([mod], "h", lazy.layout.left()),
     Key([mod], "l", lazy.layout.right()),
 
+     Key([mod], "q", lazy.to_screen(0), desc='Keyboard focus to monitor 1'),
+     Key([mod], "w", lazy.to_screen(1), desc='Keyboard focus to monitor 2'),
 
     # Move windows up or down in current stack
     Key([mod, "control"], "k", lazy.layout.shuffle_down(),
@@ -67,7 +46,7 @@ keys = [
     # multiple stack panes
     Key([mod, "shift"], "Return", lazy.layout.toggle_split(),
         desc="Toggle between split and unsplit sides of stack"),
-    Key([mod], "Return", lazy.spawn("terminator"), desc="Launch kitty"),
+    Key([mod], "Return", lazy.spawn("kitty"), desc="Launch kitty"),
 
     # Toggle between different layouts as defined below
     Key([mod], "Tab", lazy.next_layout(), desc="Toggle between layouts"),
@@ -75,17 +54,32 @@ keys = [
 
     Key([mod, "control"], "r", lazy.restart(), desc="Restart qtile"),
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown qtile"),
-    Key([mod], "r", lazy.run_extension(extension.DmenuRun(
-        dmenu_command="dmenu_run -nhb '#ebdbb2' -shb '#ebdbb2' -nhf '#282828' -shf '#665c54'",
-        background="#282828",
-        foreground = "#ebdbb2",
-        selected_background="#ebdbb2",
-        selected_foreground="#282828",
-        dmenu_height=24,
-    ))),
+    Key([mod], 'r', lazy.spawn('rofi -show drun -show-icons -theme gruvbox-dark')),
+    Key([mod, "control"], "space", lazy.spawn('rofimoji --rofi-args "-theme gruvbox-dark"')),
+
+    Key([], 'Print', lazy.spawn('gnome-screenshot')),
+    Key(['shift'], 'Print', lazy.spawn('gnome-screenshot -i')),
+    Key([mod], 'b', lazy.spawn('google-chrome')),
+    Key([mod], 'n', lazy.spawn('kitty --class="kitty-ranger" ranger')),
+    Key([mod], 'x', lazy.group['scratchpad'].dropdown_toggle('keepassxc')),
 ]
 
-groups = [Group(i) for i in "asdfuiop"]
+groups = [
+    Group("a", label="", layout="max", matches=[
+        Match(wm_class=["Google-chrome"]),
+    ]),
+    Group("s", label="", layout="max", matches=[
+        Match(wm_class=["kitty"]),
+    ]),
+    Group("d"),
+    Group("f"),
+    Group("u"),
+    Group("i"),
+    Group("o"),
+    Group("p", label="", matches=[
+        Match(wm_class=["Microsoft Teams - Preview"])
+    ]),
+]
 
 for i in groups:
     keys.extend([
@@ -101,6 +95,15 @@ for i in groups:
         # Key([mod, "shift"], i.name, lazy.window.togroup(i.name),
         #     desc="move focused window to group {}".format(i.name)),
     ])
+
+groups.extend([
+    ScratchPad("scratchpad", [
+        DropDown("keepassxc", "keepassxc",
+            x=0.3, y=0.2, width=0.4, height=0.6,
+            on_focus_lost_hide=True
+        )
+    ]),
+])
 
 lColors = {
     "border_focus": "cc241d",
@@ -132,31 +135,88 @@ widget_defaults = dict(
 )
 extension_defaults = widget_defaults.copy()
 
-screens = [
-    Screen(
-        top=bar.Bar(
-            [
-                widget.CurrentLayoutIcon(scale = 0.6),
-                widget.GroupBox(
-                    active = "ebdbb2",
-                    inactive = "665c54",
-                    this_current_screen_border = "ebdbb2",
-                    highlight_method = "line",
-                    highlight_color=["3c3836", "3c3836"],
-                    center_aligned=True,
-                ),
-                widget.WindowName(foreground = "ebdbb2"),
-                widget.Systray(),
-                widget.BatteryIcon(),
-                #widget.KhalCalendar(),
-                widget.Clock(format="%H:%M %d.%m.%Y", foreground = "ebdbb2"),
-            ],
-            24,
-            background = "282828",
-            opacity= 0.8,
-        ),
+slave_screen = Screen(
+    top=bar.Bar(
+        [
+            widget.CurrentLayoutIcon(scale = 0.6),
+            widget.GroupBox(
+                active = "ebdbb2",
+                inactive = "665c54",
+                this_current_screen_border = "ebdbb2",
+                highlight_method = "line",
+                highlight_color=["3c3836", "3c3836"],
+                center_aligned=True,
+            ),
+            widget.WindowName(foreground = "ebdbb2"),
+            #widget.Systray(),
+            #widget.BatteryIcon(),
+            #widget.KhalCalendar(),
+            widget.Clock(format="%H:%M %d.%m.%Y", foreground = "ebdbb2"),
+        ],
+        24,
+        background = "282828",
+        opacity= 0.8,
     ),
-]
+)
+
+master_screen = Screen(
+    top=bar.Bar(
+        [
+            widget.CurrentLayoutIcon(scale = 0.6),
+            widget.GroupBox(
+                active = "ebdbb2",
+                inactive = "665c54",
+                this_current_screen_border = "ebdbb2",
+                highlight_method = "line",
+                highlight_color=["3c3836", "3c3836"],
+                center_aligned=True,
+            ),
+            widget.WindowName(foreground = "ebdbb2"),
+            widget.Systray(),
+            widget.Spacer(length = 10),
+            widget.BatteryIcon(theme_path = os.path.expanduser('~/.config/qtile/battery-icons')),
+            widget.Battery(format='{percent:2.0%}'),
+            #widget.KhalCalendar(),
+            widget.Clock(format="%H:%M %d.%m.%Y", foreground = "ebdbb2"),
+        ],
+        24,
+        background = "282828",
+        opacity= 0.8,
+    ),
+)
+
+def get_num_monitors():
+    num_monitors = 0
+    try:
+        display = xdisplay.Display()
+        screen = display.screen()
+        resources = screen.root.xrandr_get_screen_resources()
+
+        for output in resources.outputs:
+            monitor = display.xrandr_get_output_info(output, resources.config_timestamp)
+            preferred = False
+            if hasattr(monitor, "preferred"):
+                preferred = monitor.preferred
+            elif hasattr(monitor, "num_preferred"):
+                preferred = monitor.num_preferred
+            if preferred:
+                num_monitors += 1
+    except Exception as e:
+        # always setup at least one monitor
+        return 1
+    else:
+        return num_monitors
+
+count = get_num_monitors()
+logger.warning(count)
+
+screens = [master_screen]
+
+if count > 1:
+    subprocess.call([os.path.expanduser('~/.config/qtile/screenlayouts/' + str(count) + 'screens.sh')])
+
+if count == 2:
+    screens = [slave_screen, master_screen]
 
 # Drag floating layouts.
 mouse = [
@@ -189,9 +249,17 @@ floating_layout = layout.Floating(float_rules=[
     {'wname': 'branchdialog'},  # gitk
     {'wname': 'pinentry'},  # GPG key password entry
     {'wmclass': 'ssh-askpass'},  # ssh-askpass
+    {'wmclass': 'gnome-screenshot'},
 ])
 auto_fullscreen = True
 focus_on_window_activation = "smart"
+
+@hook.subscribe.client_new
+def floating_dialogs(window):
+    dialog = window.window.get_wm_type() == 'dialog' or window.window.get_wm_type() == "notification"
+    transient = window.window.get_wm_transient_for()
+    if dialog or transient:
+        window.floating = True
 
 # XXX: Gasp! We're lying here. In fact, nobody really uses or cares about this
 # string besides java UI toolkits; you can see several discussions on the
@@ -207,3 +275,23 @@ wmname = "LG3D"
 def autostart():
     home = os.path.expanduser('~/.config/qtile/autostart.sh')
     subprocess.call([home])
+
+def detect_screens(qtile):
+    def setup_monitors(action=None, device=None):
+        if action == "change":
+            logger.warning('testoooo')
+            qtile.cmd_restart()
+
+    setup_monitors()
+
+    context = pyudev.Context()
+    monitor = pyudev.Monitor.from_netlink(context)
+    monitor.filter_by('drm')
+    monitor.enable_receiving()
+
+    # observe if the monitors change and reset monitors config
+    observer = pyudev.MonitorObserver(monitor, setup_monitors)
+    observer.start()
+
+def main(qtile):
+    detect_screens(qtile)
