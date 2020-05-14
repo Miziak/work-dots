@@ -51,6 +51,7 @@ keys = [
     # Toggle between different layouts as defined below
     Key([mod], "Tab", lazy.next_layout(), desc="Toggle between layouts"),
     Key([mod], "c", lazy.window.kill(), desc="Kill focused window"),
+    Key([mod, 'control'], "f", lazy.window.toggle_floating()),
 
     Key([mod, "control"], "r", lazy.restart(), desc="Restart qtile"),
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown qtile"),
@@ -156,7 +157,7 @@ slave_screen = Screen(
         ],
         24,
         background = "282828",
-        opacity= 0.8,
+        opacity= 0.95,
     ),
 )
 
@@ -182,7 +183,7 @@ master_screen = Screen(
         ],
         24,
         background = "282828",
-        opacity= 0.8,
+        opacity= 0.95,
     ),
 )
 
@@ -210,13 +211,8 @@ def get_num_monitors():
 
 count = get_num_monitors()
 
-screens = [master_screen]
-
-if count > 1:
-    subprocess.call([os.path.expanduser('~/.config/qtile/screenlayouts/' + str(count) + 'screens.sh')])
-
-if count == 2:
-    screens = [slave_screen, master_screen]
+subprocess.call([os.path.expanduser('~/.config/qtile/screenlayouts/' + str(count) + 'screens.sh')])
+screens = list(map(lambda i: master_screen if i == 0 else slave_screen, range(count)))
 
 # Drag floating layouts.
 mouse = [
@@ -279,7 +275,6 @@ def autostart():
 def detect_screens(qtile):
     def setup_monitors(action=None, device=None):
         if action == "change":
-            logger.warning('testoooo')
             qtile.cmd_restart()
 
     setup_monitors()
