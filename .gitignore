@@ -1,11 +1,4 @@
-/*
-!.gitignore
-!/qtile
-/qtile/__pycache__
-!/kitty
-!/dunst
-!/picom
-!/ranger
+__pycache__/
 
 *.o
 *.py~
