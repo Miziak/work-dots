@@ -65,7 +65,7 @@ groups = [
         Match(wm_class=["Google-chrome"]),
     ]),
     Group("s", label="", layout="max", matches=[
-        Match(wm_class=["goneovim"]),
+        Match(wm_class=["kitty-nvim"]),
     ]),
     Group("d"),
     Group("f"),
