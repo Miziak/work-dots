@@ -10,58 +10,48 @@ from libqtile.config import Click, Drag, Group, Key, Screen, Match, ScratchPad, 
 from libqtile.lazy import lazy
 from libqtile.log_utils import logger
 
-#xephyr mod
-#mod = "mod1"
+control = "control"
+shift = "shift"
+alt = "mod1"
 mod = "mod4"
+#xephyr mod
+#mod = alt
+
+term = "alacritty"
 
 keys = [
-    # Switch between windows in current stack pane
-    Key([mod], "k", lazy.layout.down(),
-        desc="Move focus down in stack pane"),
-    Key([mod], "j", lazy.layout.up(),
-        desc="Move focus up in stack pane"),
     Key([mod], "h", lazy.layout.left()),
     Key([mod], "l", lazy.layout.right()),
+    Key([mod], "j", lazy.layout.down()),
+    Key([mod], "k", lazy.layout.up()),
+    Key([mod, control], "h", lazy.layout.swap_left()),
+    Key([mod, control], "l", lazy.layout.swap_right()),
+    Key([mod, control], "j", lazy.layout.shuffle_down()),
+    Key([mod, control], "k", lazy.layout.shuffle_up()),
+    Key([mod, shift], "l", lazy.layout.grow()),
+    Key([mod, shift], "h", lazy.layout.shrink()),
+    Key([mod], "equal", lazy.layout.normalize()),
+    Key([mod], "c", lazy.window.kill(), desc="Kill focused window"),
 
-     Key([mod], "q", lazy.to_screen(0), desc='Keyboard focus to monitor 1'),
-     Key([mod], "w", lazy.to_screen(1), desc='Keyboard focus to monitor 2'),
-
-    # Move windows up or down in current stack
-    Key([mod, "control"], "k", lazy.layout.shuffle_down(),
-        desc="Move window down in current stack "),
-    Key([mod, "control"], "j", lazy.layout.shuffle_up(),
-        desc="Move window up in current stack "),
-
-    # Switch window focus to other pane(s) of stack
-    Key([mod], "space", lazy.layout.next(),
-        desc="Switch window focus to other pane(s) of stack"),
-
-    # Swap panes of split stack
-    Key([mod, "shift"], "space", lazy.layout.rotate(),
-        desc="Swap panes of split stack"),
-
-    # Toggle between split and unsplit sides of stack.
-    # Split = all windows displayed
-    # Unsplit = 1 window displayed, like Max layout, but still with
-    # multiple stack panes
-    Key([mod, "shift"], "Return", lazy.layout.toggle_split(),
-        desc="Toggle between split and unsplit sides of stack"),
-    Key([mod], "Return", lazy.spawn("kitty"), desc="Launch kitty"),
+    Key([mod], "q", lazy.to_screen(0), desc="Keyboard focus to monitor 1"),
+    Key([mod], "w", lazy.to_screen(1), desc="Keyboard focus to monitor 2"),
+    Key([mod], "Return", lazy.spawn(term)),
 
     # Toggle between different layouts as defined below
     Key([mod], "Tab", lazy.next_layout(), desc="Toggle between layouts"),
-    Key([mod], "c", lazy.window.kill(), desc="Kill focused window"),
-    Key([mod, 'control'], "f", lazy.window.toggle_floating()),
+    Key([mod, control], "f", lazy.window.toggle_floating()),
+    Key([mod, alt], "m", lazy.to_layout_index(1)),
+    Key([mod, alt], "s", lazy.to_layout_index(0)),
 
-    Key([mod, "control"], "r", lazy.restart(), desc="Restart qtile"),
-    Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown qtile"),
-    Key([mod], 'r', lazy.spawn('rofi -show drun -show-icons -theme gruvbox-dark')),
-    Key([mod, "control"], "space", lazy.spawn('rofimoji --rofi-args "-theme gruvbox-dark"')),
+    Key([mod, control], "r", lazy.restart(), desc="Restart qtile"),
+    Key([mod, control], "q", lazy.shutdown(), desc="Shutdown qtile"),
+    Key([mod], "r", lazy.spawn("rofi -show drun -show-icons -theme gruvbox-dark")),
+    Key([mod, control], "space", lazy.spawn("rofimoji --rofi-args \"-theme gruvbox-dark\"")),
 
-    Key([], 'Print', lazy.spawn('gnome-screenshot')),
-    Key(['shift'], 'Print', lazy.spawn('gnome-screenshot -i')),
-    Key([mod], 'b', lazy.spawn('google-chrome')),
-    Key([mod], 'n', lazy.spawn('kitty --class="kitty-ranger" ranger')),
+    Key([], "Print", lazy.spawn("gnome-screenshot")),
+    Key([shift], "Print", lazy.spawn("gnome-screenshot -i")),
+    Key([mod], "b", lazy.spawn("google-chrome")),
+    Key([mod], "n", lazy.spawn(term + " --class=\"term-ranger\" -e ranger")),
 ]
 
 groups = [
@@ -75,22 +65,24 @@ groups = [
         Match(wm_class=["Google-chrome"]),
     ]),
     Group("s", label="", layout="max", matches=[
-        Match(wm_class=["kitty"]),
+        Match(wm_class=["goneovim"]),
     ]),
     Group("d"),
     Group("f"),
     Group("u"),
     Group("i"),
-    Group("o"),
+    Group("o", label="", matches=[
+        Match(wm_class=["Evolution"])
+    ]),
     Group("p", label="", matches=[
         Match(wm_class=["Microsoft Teams - Preview"])
     ]),
 ]
 
 for i in groups:
-    if i.name == 'scratchpad':
+    if i.name == "scratchpad":
         keys.extend([
-            Key([mod], 'x', lazy.group['scratchpad'].dropdown_toggle('keepassxc')),
+            Key([mod], "x", lazy.group["scratchpad"].dropdown_toggle("keepassxc")),
         ])
     else:
         keys.extend([
@@ -117,13 +109,13 @@ lColors = {
 layouts = [
     layout.MonadTall(**lColors),
     layout.Max(**lColors),
-    layout.Stack(**lColors, num_stacks=2),
+    layout.MonadWide(),
     # Try more layouts by unleashing below layouts.
     # layout.Bsp(),
     # layout.Columns(),
     # layout.Matrix(),
-    # layout.MonadWide(),
     # layout.RatioTile(),
+    # layout.Stack(**lColors, num_stacks=2),
     # layout.Tile(),
     # layout.TreeTab(),
     # layout.VerticalTile(),
@@ -131,7 +123,7 @@ layouts = [
 ]
 
 widget_defaults = dict(
-    font='sans',
+    font="sans",
     fontsize=12,
     padding=3,
 )
@@ -176,8 +168,8 @@ master_screen = Screen(
             widget.WindowName(foreground = "ebdbb2"),
             widget.Systray(),
             widget.Spacer(length = 10),
-            widget.BatteryIcon(theme_path = os.path.expanduser('~/.config/qtile/battery-icons')),
-            widget.Battery(format='{percent:2.0%}'),
+            widget.BatteryIcon(theme_path = os.path.expanduser("~/.config/qtile/battery-icons")),
+            widget.Battery(format="{percent:2.0%}"),
             #widget.KhalCalendar(),
             widget.Clock(format="%H:%M %d.%m.%Y", foreground = "ebdbb2"),
         ],
@@ -211,7 +203,7 @@ def get_num_monitors():
 
 count = get_num_monitors()
 
-subprocess.call([os.path.expanduser('~/.config/qtile/screenlayouts/' + str(count) + 'screens.sh')])
+subprocess.call([os.path.expanduser("~/.config/qtile/screenlayouts/" + str(count) + "screens.sh")])
 screens = list(map(lambda i: master_screen if i == 0 else slave_screen, range(count)))
 
 # Drag floating layouts.
@@ -231,45 +223,47 @@ bring_front_click = False
 cursor_warp = False
 floating_layout = layout.Floating(float_rules=[
     # Run the utility of `xprop` to see the wm class and name of an X client.
-    {'wmclass': 'confirm'},
-    {'wmclass': 'dialog'},
-    {'wmclass': 'download'},
-    {'wmclass': 'error'},
-    {'wmclass': 'file_progress'},
-    {'wmclass': 'notification'},
-    {'wmclass': 'splash'},
-    {'wmclass': 'toolbar'},
-    {'wmclass': 'confirmreset'},  # gitk
-    {'wmclass': 'makebranch'},  # gitk
-    {'wmclass': 'maketag'},  # gitk
-    {'wname': 'branchdialog'},  # gitk
-    {'wname': 'pinentry'},  # GPG key password entry
-    {'wmclass': 'ssh-askpass'},  # ssh-askpass
-    {'wmclass': 'gnome-screenshot'},
+    {"wmclass": "confirm"},
+    {"wmclass": "dialog"},
+    {"wmclass": "download"},
+    {"wmclass": "error"},
+    {"wmclass": "file_progress"},
+    {"wmclass": "notification"},
+    {"wmclass": "splash"},
+    {"wmclass": "toolbar"},
+    {"wmclass": "confirmreset"},  # gitk
+    {"wmclass": "makebranch"},  # gitk
+    {"wmclass": "maketag"},  # gitk
+    {"wname": "branchdialog"},  # gitk
+    {"wname": "pinentry"},  # GPG key password entry
+    {"wmclass": "ssh-askpass"},  # ssh-askpass
+    {"wmclass": "gnome-screenshot"},
+    {"wmclass": "Evolution-alarm-notify"},
 ])
 auto_fullscreen = True
 focus_on_window_activation = "smart"
 
 @hook.subscribe.client_new
 def floating_dialogs(window):
-    dialog = window.window.get_wm_type() == 'dialog' or window.window.get_wm_type() == "notification"
+    dialog = (window.window.get_wm_type() == "dialog" or
+        window.window.get_wm_type() == "notification")
     transient = window.window.get_wm_transient_for()
     if dialog or transient:
         window.floating = True
 
-# XXX: Gasp! We're lying here. In fact, nobody really uses or cares about this
+# XXX: Gasp! We"re lying here. In fact, nobody really uses or cares about this
 # string besides java UI toolkits; you can see several discussions on the
 # mailing lists, GitHub issues, and other WM documentation that suggest setting
-# this string if your java app doesn't work correctly. We may as well just lie
-# and say that we're a working one by default.
+# this string if your java app doesn"t work correctly. We may as well just lie
+# and say that we"re a working one by default.
 #
 # We choose LG3D to maximize irony: it is a 3D non-reparenting WM written in
-# java that happens to be on java's whitelist.
+# java that happens to be on java"s whitelist.
 wmname = "LG3D"
 
 @hook.subscribe.startup_once
 def autostart():
-    home = os.path.expanduser('~/.config/qtile/autostart.sh')
+    home = os.path.expanduser("~/.config/qtile/autostart.sh")
     subprocess.call([home])
 
 def detect_screens(qtile):
@@ -281,7 +275,7 @@ def detect_screens(qtile):
 
     context = pyudev.Context()
     monitor = pyudev.Monitor.from_netlink(context)
-    monitor.filter_by('drm')
+    monitor.filter_by("drm")
     monitor.enable_receiving()
 
     # observe if the monitors change and reset monitors config

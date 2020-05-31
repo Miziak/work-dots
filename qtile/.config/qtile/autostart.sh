@@ -6,4 +6,5 @@ variety&
 nm-applet&
 clipit&
 teams&
+evolution&
 sleep 2 && pasystray&
