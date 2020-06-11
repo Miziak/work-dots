@@ -44,7 +44,7 @@ keys = [
     Key([mod, control], "q", lazy.shutdown(), desc="Shutdown qtile"),
     Key([mod], "r", lazy.spawn("rofi -show drun")),
     Key([mod, control], "space", lazy.spawn("rofimoji")),
-    Key([mod], "m", lazy.spawn(os.path.expanduser("~/.config/rofi/screen-layouts-changer.sh"))),
+    Key([mod], "m", lazy.spawn(os.path.expanduser("~/.config/rofi/rofi-layouts-changer.sh"))),
     Key([], "Print", lazy.spawn("gnome-screenshot")),
     Key([shift], "Print", lazy.spawn("gnome-screenshot -i")),
     Key([mod], "b", lazy.spawn("google-chrome")),
@@ -216,15 +216,13 @@ count = get_num_monitors()
 mirror = os.path.exists("/tmp/QTILE_SCREEN_MIRROR")
 
 subprocess.call(
-    [
-        os.path.expanduser(
-            "~/.config/qtile/screenlayouts/"
-            + ("mirror" if mirror else "")
-            + str(count)
-            + "screens.sh"
+    os.path.expanduser(
+        "~/.config/qtile/screenlayouts/{}{}screens.sh".format(
+            "mirror" if mirror else "", str(count)
         )
-    ]
+    )
 )
+
 screens = list(map(lambda i: master_screen if i == 0 else slave_screen, range(count)))
 
 # Drag floating layouts.
