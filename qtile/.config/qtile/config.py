@@ -126,12 +126,14 @@ widget_defaults = dict(
     font="Ubuntu Regular",
     fontsize=14,
     padding=3,
+    foreground = "ebdbb2",
 )
 extension_defaults = widget_defaults.copy()
 
 slave_screen = Screen(
     top=bar.Bar(
         [
+            widget.Spacer(length = 10),
             widget.CurrentLayoutIcon(scale = 0.6),
             widget.GroupBox(
                 active = "ebdbb2",
@@ -141,12 +143,12 @@ slave_screen = Screen(
                 highlight_color=["3c3836", "3c3836"],
                 center_aligned=True,
             ),
-            widget.WindowName(width = 600, foreground = "ebdbb2", for_current_screen = True),
+            widget.WindowName(width = 600, for_current_screen = True),
             widget.Spacer(length = bar.STRETCH),
-            widget.Clock(format="<b>%H:%M %d.%m.%Y</b>", foreground = "ebdbb2"),
+            widget.Clock(format="<b>%H:%M %d.%m.%Y</b>"),
             widget.Spacer(length = bar.STRETCH),
         ],
-        24,
+        30,
         background = "282828",
         opacity= 0.95,
         margin = [3, 0, 3, 0],
@@ -156,6 +158,7 @@ slave_screen = Screen(
 master_screen = Screen(
     top=bar.Bar(
         [
+            widget.Spacer(length = 10),
             widget.CurrentLayoutIcon(scale = 0.6),
             widget.GroupBox(
                 active = "ebdbb2",
@@ -165,17 +168,19 @@ master_screen = Screen(
                 highlight_color=["3c3836", "3c3836"],
                 center_aligned=True,
             ),
-            widget.WindowName(width = 600, foreground = "ebdbb2", for_current_screen = True),
+            widget.WindowName(width = 600, for_current_screen = True),
             widget.Spacer(length = bar.STRETCH),
-            widget.Clock(format="<b>%H:%M %d.%m.%Y</b>", foreground = "ebdbb2"),
+            widget.Clock(format="<b>%H:%M %d.%m.%Y</b>"),
             widget.Spacer(length = bar.STRETCH),
             widget.Systray(),
             widget.Spacer(length = 10),
-            widget.BatteryIcon(theme_path = os.path.expanduser("~/.config/qtile/battery-icons")),
-            widget.Battery(format="{percent:2.0%}"),
-            #widget.KhalCalendar(),
+            widget.BatteryIcon(
+                theme_path = os.path.expanduser("~/.config/qtile/battery-icons"),
+            ),
+            widget.Battery(format="{percent:2.0%}", **widget_defaults),
+            widget.Spacer(length = 10),
         ],
-        24,
+        30,
         background = "282828",
         opacity= 0.95,
         margin = [3, 0, 3, 0],
