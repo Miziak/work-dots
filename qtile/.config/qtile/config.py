@@ -14,8 +14,8 @@ control = "control"
 shift = "shift"
 alt = "mod1"
 mod = "mod4"
-#xephyr mod
-#mod = alt
+# xephyr mod
+# mod = alt
 
 term = "alacritty"
 
@@ -32,72 +32,78 @@ keys = [
     Key([mod, shift], "h", lazy.layout.shrink()),
     Key([mod], "equal", lazy.layout.normalize()),
     Key([mod], "c", lazy.window.kill(), desc="Kill focused window"),
-
     Key([mod], "q", lazy.to_screen(0), desc="Keyboard focus to monitor 1"),
     Key([mod], "w", lazy.to_screen(1), desc="Keyboard focus to monitor 2"),
     Key([mod], "Return", lazy.spawn(term)),
-
     # Toggle between different layouts as defined below
     Key([mod], "Tab", lazy.next_layout(), desc="Toggle between layouts"),
     Key([mod, control], "f", lazy.window.toggle_floating()),
     Key([mod, alt], "m", lazy.to_layout_index(1)),
     Key([mod, alt], "s", lazy.to_layout_index(0)),
-
     Key([mod, control], "r", lazy.restart(), desc="Restart qtile"),
     Key([mod, control], "q", lazy.shutdown(), desc="Shutdown qtile"),
     Key([mod], "r", lazy.spawn("rofi -show drun")),
     Key([mod, control], "space", lazy.spawn("rofimoji")),
-
     Key([], "Print", lazy.spawn("gnome-screenshot")),
     Key([shift], "Print", lazy.spawn("gnome-screenshot -i")),
     Key([mod], "b", lazy.spawn("google-chrome")),
-    Key([mod], "n", lazy.spawn(term + " --class=\"term-ranger\" -e ranger")),
+    Key([mod], "n", lazy.spawn(term + ' --class="term-ranger" -e ranger')),
 ]
 
 groups = [
-    ScratchPad("scratchpad", [
-        DropDown("keepassxc", "keepassxc",
-            x=0.3, y=0.2, width=0.4, height=0.6,
-            on_focus_lost_hide=True
-        )
-    ]),
-    Group("a", label="", layout="max", matches=[
-        Match(wm_class=["Google-chrome"]),
-    ]),
-    Group("s", label="", layout="max", matches=[
-        Match(wm_class=["kitty-nvim"]),
-    ]),
+    ScratchPad(
+        "scratchpad",
+        [
+            DropDown(
+                "keepassxc",
+                "keepassxc",
+                x=0.3,
+                y=0.2,
+                width=0.4,
+                height=0.6,
+                on_focus_lost_hide=True,
+            )
+        ],
+    ),
+    Group("a", label="", layout="max", matches=[Match(wm_class=["Google-chrome"]),]),
+    Group("s", label="", layout="max", matches=[Match(wm_class=["kitty-nvim"]),]),
     Group("d"),
     Group("f"),
     Group("u"),
     Group("i"),
-    Group("o", label="", matches=[
-        Match(wm_class=["Evolution"])
-    ]),
-    Group("p", label="", matches=[
-        Match(wm_class=["Microsoft Teams - Preview"])
-    ]),
+    Group("o", label="", matches=[Match(wm_class=["Evolution"])]),
+    Group("p", label="", matches=[Match(wm_class=["Microsoft Teams - Preview"])]),
 ]
 
 for i in groups:
     if i.name == "scratchpad":
-        keys.extend([
-            Key([mod], "x", lazy.group["scratchpad"].dropdown_toggle("keepassxc")),
-        ])
+        keys.extend(
+            [Key([mod], "x", lazy.group["scratchpad"].dropdown_toggle("keepassxc")),]
+        )
     else:
-        keys.extend([
-            # mod1 + letter of group = switch to group
-            Key([mod], i.name, lazy.group[i.name].toscreen(),
-                desc="Switch to group {}".format(i.name)),
-
-            # mod1 + shift + letter of group = switch to & move focused window to group
-            Key([mod, "shift"], i.name, lazy.window.togroup(i.name, switch_group=True),
-                desc="Switch to & move focused window to group {}".format(i.name)),
-            # Or, use below if you prefer not to switch to that group.
-            # # mod1 + shift + letter of group = move focused window to group
-            # Key([mod, "shift"], i.name, lazy.window.togroup(i.name),
-            #     desc="move focused window to group {}".format(i.name)),
-        ])
+        keys.extend(
+            [
+                # mod1 + letter of group = switch to group
+                Key(
+                    [mod],
+                    i.name,
+                    lazy.group[i.name].toscreen(),
+                    desc="Switch to group {}".format(i.name),
+                ),
+                # mod1 + shift + letter of group = switch to & move focused window to
+                # group
+                Key(
+                    [mod, "shift"],
+                    i.name,
+                    lazy.window.togroup(i.name, switch_group=True),
+                    desc="Switch to & move focused window to group {}".format(i.name),
+                ),
+                # Or, use below if you prefer not to switch to that group.
+                # # mod1 + shift + letter of group = move focused window to group
+                # Key([mod, "shift"], i.name, lazy.window.togroup(i.name),
+                #     desc="move focused window to group {}".format(i.name)),
+            ]
+        )
 
 lColors = {
     "border_focus": "cc241d",
@@ -122,70 +128,64 @@ layouts = [
     # layout.Zoomy(),
 ]
 
-widget_defaults = dict(
-    font="Ubuntu Regular",
-    fontsize=14,
-    padding=3,
-    foreground = "ebdbb2",
-)
+widget_defaults = dict(font="Ubuntu Regular", fontsize=14, padding=3, foreground="ebdbb2",)
 extension_defaults = widget_defaults.copy()
 
 slave_screen = Screen(
     top=bar.Bar(
         [
-            widget.Spacer(length = 10),
-            widget.CurrentLayoutIcon(scale = 0.6),
+            widget.Spacer(length=10),
+            widget.CurrentLayoutIcon(scale=0.6),
             widget.GroupBox(
-                active = "ebdbb2",
-                inactive = "665c54",
-                this_current_screen_border = "ebdbb2",
-                highlight_method = "line",
+                active="ebdbb2",
+                inactive="665c54",
+                this_current_screen_border="ebdbb2",
+                highlight_method="line",
                 highlight_color=["3c3836", "3c3836"],
                 center_aligned=True,
             ),
-            widget.WindowName(width = 600, for_current_screen = True),
-            widget.Spacer(length = bar.STRETCH),
+            widget.WindowName(width=600, for_current_screen=True),
+            widget.Spacer(length=bar.STRETCH),
             widget.Clock(format="<b>%H:%M %d.%m.%Y</b>"),
-            widget.Spacer(length = bar.STRETCH),
+            widget.Spacer(length=bar.STRETCH),
         ],
         30,
-        background = "282828",
-        opacity= 0.95,
-        margin = [3, 0, 3, 0],
+        background="282828",
+        opacity=0.95,
+        margin=[3, 0, 3, 0],
     ),
 )
 
 master_screen = Screen(
     top=bar.Bar(
         [
-            widget.Spacer(length = 10),
-            widget.CurrentLayoutIcon(scale = 0.6),
+            widget.Spacer(length=10),
+            widget.CurrentLayoutIcon(scale=0.6),
             widget.GroupBox(
-                active = "ebdbb2",
-                inactive = "665c54",
-                this_current_screen_border = "ebdbb2",
-                highlight_method = "line",
+                active="ebdbb2",
+                inactive="665c54",
+                this_current_screen_border="ebdbb2",
+                highlight_method="line",
                 highlight_color=["3c3836", "3c3836"],
                 center_aligned=True,
             ),
-            widget.WindowName(width = 600, for_current_screen = True),
-            widget.Spacer(length = bar.STRETCH),
+            widget.WindowName(width=600, for_current_screen=True),
+            widget.Spacer(length=bar.STRETCH),
             widget.Clock(format="<b>%H:%M %d.%m.%Y</b>"),
-            widget.Spacer(length = bar.STRETCH),
+            widget.Spacer(length=bar.STRETCH),
             widget.Systray(),
-            widget.Spacer(length = 10),
-            widget.BatteryIcon(
-                theme_path = os.path.expanduser("~/.config/qtile/battery-icons"),
-            ),
+            widget.Spacer(length=10),
+            widget.BatteryIcon(theme_path=os.path.expanduser("~/.config/qtile/battery-icons"),),
             widget.Battery(format="{percent:2.0%}", **widget_defaults),
-            widget.Spacer(length = 10),
+            widget.Spacer(length=10),
         ],
         30,
-        background = "282828",
-        opacity= 0.95,
-        margin = [3, 0, 3, 0],
+        background="282828",
+        opacity=0.95,
+        margin=[3, 0, 3, 0],
     ),
 )
+
 
 def get_num_monitors():
     num_monitors = 0
@@ -209,6 +209,7 @@ def get_num_monitors():
     else:
         return num_monitors
 
+
 count = get_num_monitors()
 
 subprocess.call([os.path.expanduser("~/.config/qtile/screenlayouts/" + str(count) + "screens.sh")])
@@ -216,11 +217,9 @@ screens = list(map(lambda i: master_screen if i == 0 else slave_screen, range(co
 
 # Drag floating layouts.
 mouse = [
-    Drag([mod], "Button1", lazy.window.set_position_floating(),
-         start=lazy.window.get_position()),
-    Drag([mod], "Button3", lazy.window.set_size_floating(),
-         start=lazy.window.get_size()),
-    Click([mod], "Button2", lazy.window.bring_to_front())
+    Drag([mod], "Button1", lazy.window.set_position_floating(), start=lazy.window.get_position()),
+    Drag([mod], "Button3", lazy.window.set_size_floating(), start=lazy.window.get_size()),
+    Click([mod], "Button2", lazy.window.bring_to_front()),
 ]
 
 dgroups_key_binder = None
@@ -229,35 +228,40 @@ main = None
 follow_mouse_focus = True
 bring_front_click = False
 cursor_warp = False
-floating_layout = layout.Floating(float_rules=[
-    # Run the utility of `xprop` to see the wm class and name of an X client.
-    {"wmclass": "confirm"},
-    {"wmclass": "dialog"},
-    {"wmclass": "download"},
-    {"wmclass": "error"},
-    {"wmclass": "file_progress"},
-    {"wmclass": "notification"},
-    {"wmclass": "splash"},
-    {"wmclass": "toolbar"},
-    {"wmclass": "confirmreset"},  # gitk
-    {"wmclass": "makebranch"},  # gitk
-    {"wmclass": "maketag"},  # gitk
-    {"wname": "branchdialog"},  # gitk
-    {"wname": "pinentry"},  # GPG key password entry
-    {"wmclass": "ssh-askpass"},  # ssh-askpass
-    {"wmclass": "gnome-screenshot"},
-    {"wmclass": "Evolution-alarm-notify"},
-])
+floating_layout = layout.Floating(
+    float_rules=[
+        # Run the utility of `xprop` to see the wm class and name of an X client.
+        {"wmclass": "confirm"},
+        {"wmclass": "dialog"},
+        {"wmclass": "download"},
+        {"wmclass": "error"},
+        {"wmclass": "file_progress"},
+        {"wmclass": "notification"},
+        {"wmclass": "splash"},
+        {"wmclass": "toolbar"},
+        {"wmclass": "confirmreset"},  # gitk
+        {"wmclass": "makebranch"},  # gitk
+        {"wmclass": "maketag"},  # gitk
+        {"wname": "branchdialog"},  # gitk
+        {"wname": "pinentry"},  # GPG key password entry
+        {"wmclass": "ssh-askpass"},  # ssh-askpass
+        {"wmclass": "gnome-screenshot"},
+        {"wmclass": "Evolution-alarm-notify"},
+    ]
+)
 auto_fullscreen = True
 focus_on_window_activation = "smart"
 
+
 @hook.subscribe.client_new
 def floating_dialogs(window):
-    dialog = (window.window.get_wm_type() == "dialog" or
-        window.window.get_wm_type() == "notification")
+    dialog = (
+        window.window.get_wm_type() == "dialog" or window.window.get_wm_type() == "notification"
+    )
     transient = window.window.get_wm_transient_for()
     if dialog or transient:
         window.floating = True
+
 
 # XXX: Gasp! We"re lying here. In fact, nobody really uses or cares about this
 # string besides java UI toolkits; you can see several discussions on the
@@ -269,10 +273,12 @@ def floating_dialogs(window):
 # java that happens to be on java"s whitelist.
 wmname = "LG3D"
 
+
 @hook.subscribe.startup_once
 def autostart():
     home = os.path.expanduser("~/.config/qtile/autostart.sh")
     subprocess.call([home])
+
 
 def detect_screens(qtile):
     def setup_monitors(action=None, device=None):
@@ -289,6 +295,7 @@ def detect_screens(qtile):
     # observe if the monitors change and reset monitors config
     observer = pyudev.MonitorObserver(monitor, setup_monitors)
     observer.start()
+
 
 def main(qtile):
     detect_screens(qtile)
