@@ -45,8 +45,8 @@ keys = [
 
     Key([mod, control], "r", lazy.restart(), desc="Restart qtile"),
     Key([mod, control], "q", lazy.shutdown(), desc="Shutdown qtile"),
-    Key([mod], "r", lazy.spawn("rofi -show drun -show-icons -theme gruvbox-dark")),
-    Key([mod, control], "space", lazy.spawn("rofimoji --rofi-args \"-theme gruvbox-dark\"")),
+    Key([mod], "r", lazy.spawn("rofi -show drun")),
+    Key([mod, control], "space", lazy.spawn("rofimoji")),
 
     Key([], "Print", lazy.spawn("gnome-screenshot")),
     Key([shift], "Print", lazy.spawn("gnome-screenshot -i")),
@@ -123,8 +123,8 @@ layouts = [
 ]
 
 widget_defaults = dict(
-    font="sans",
-    fontsize=12,
+    font="Ubuntu Regular",
+    fontsize=14,
     padding=3,
 )
 extension_defaults = widget_defaults.copy()
@@ -141,15 +141,15 @@ slave_screen = Screen(
                 highlight_color=["3c3836", "3c3836"],
                 center_aligned=True,
             ),
-            widget.WindowName(foreground = "ebdbb2"),
-            #widget.Systray(),
-            #widget.BatteryIcon(),
-            #widget.KhalCalendar(),
-            widget.Clock(format="%H:%M %d.%m.%Y", foreground = "ebdbb2"),
+            widget.WindowName(width = 600, foreground = "ebdbb2", for_current_screen = True),
+            widget.Spacer(length = bar.STRETCH),
+            widget.Clock(format="<b>%H:%M %d.%m.%Y</b>", foreground = "ebdbb2"),
+            widget.Spacer(length = bar.STRETCH),
         ],
         24,
         background = "282828",
         opacity= 0.95,
+        margin = [3, 0, 3, 0],
     ),
 )
 
@@ -165,17 +165,20 @@ master_screen = Screen(
                 highlight_color=["3c3836", "3c3836"],
                 center_aligned=True,
             ),
-            widget.WindowName(foreground = "ebdbb2"),
+            widget.WindowName(width = 600, foreground = "ebdbb2", for_current_screen = True),
+            widget.Spacer(length = bar.STRETCH),
+            widget.Clock(format="<b>%H:%M %d.%m.%Y</b>", foreground = "ebdbb2"),
+            widget.Spacer(length = bar.STRETCH),
             widget.Systray(),
             widget.Spacer(length = 10),
             widget.BatteryIcon(theme_path = os.path.expanduser("~/.config/qtile/battery-icons")),
             widget.Battery(format="{percent:2.0%}"),
             #widget.KhalCalendar(),
-            widget.Clock(format="%H:%M %d.%m.%Y", foreground = "ebdbb2"),
         ],
         24,
         background = "282828",
         opacity= 0.95,
+        margin = [3, 0, 3, 0],
     ),
 )
 
