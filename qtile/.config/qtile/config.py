@@ -49,6 +49,8 @@ keys = [
     Key([shift], "Print", lazy.spawn("gnome-screenshot -i")),
     Key([mod], "b", lazy.spawn("google-chrome")),
     Key([mod], "n", lazy.spawn(term + ' --class="term-ranger" -e ranger')),
+    # scratchpads
+    Key([mod], "x", lazy.group["scratchpad"].dropdown_toggle("keepassxc")),
 ]
 
 groups = [
@@ -76,35 +78,30 @@ groups = [
     Group("p", label="", matches=[Match(wm_class=["Microsoft Teams - Preview"])]),
 ]
 
-for i in groups:
-    if i.name == "scratchpad":
-        keys.extend(
-            [Key([mod], "x", lazy.group["scratchpad"].dropdown_toggle("keepassxc")),]
-        )
-    else:
-        keys.extend(
-            [
-                # mod1 + letter of group = switch to group
-                Key(
-                    [mod],
-                    i.name,
-                    lazy.group[i.name].toscreen(),
-                    desc="Switch to group {}".format(i.name),
-                ),
-                # mod1 + shift + letter of group = switch to & move focused window to
-                # group
-                Key(
-                    [mod, "shift"],
-                    i.name,
-                    lazy.window.togroup(i.name, switch_group=True),
-                    desc="Switch to & move focused window to group {}".format(i.name),
-                ),
-                # Or, use below if you prefer not to switch to that group.
-                # # mod1 + shift + letter of group = move focused window to group
-                # Key([mod, "shift"], i.name, lazy.window.togroup(i.name),
-                #     desc="move focused window to group {}".format(i.name)),
-            ]
-        )
+for i in groups[1:]:
+    keys.extend(
+        [
+            # mod1 + letter of group = switch to group
+            Key(
+                [mod],
+                i.name,
+                lazy.group[i.name].toscreen(),
+                desc="Switch to group {}".format(i.name),
+            ),
+            # mod1 + shift + letter of group = switch to & move focused window to
+            # group
+            Key(
+                [mod, "shift"],
+                i.name,
+                lazy.window.togroup(i.name, switch_group=True),
+                desc="Switch to & move focused window to group {}".format(i.name),
+            ),
+            # Or, use below if you prefer not to switch to that group.
+            # # mod1 + shift + letter of group = move focused window to group
+            # Key([mod, "shift"], i.name, lazy.window.togroup(i.name),
+            #     desc="move focused window to group {}".format(i.name)),
+        ]
+    )
 
 lColors = {
     "border_focus": "cc241d",
@@ -286,8 +283,7 @@ wmname = "LG3D"
 
 @hook.subscribe.startup_once
 def autostart():
-    home = os.path.expanduser("~/.config/qtile/autostart.sh")
-    subprocess.call([home])
+    subprocess.call(os.path.expanduser("~/.config/qtile/autostart.sh"))
 
 
 def detect_screens(qtile):
